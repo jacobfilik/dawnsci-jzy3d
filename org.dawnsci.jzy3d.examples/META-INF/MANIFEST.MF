@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Examples
+Bundle-SymbolicName: org.dawnsci.jzy3d.examples;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.ui,
+ com.jogamp.jogl,
+ org.eclipse.january,
+ org.dawnsci.jzy3d;bundle-version="1.0.0",
+ uk.ac.diamond.scisoft.analysis
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

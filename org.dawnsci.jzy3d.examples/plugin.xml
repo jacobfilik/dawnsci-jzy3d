@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="JZy3d"
+            id="org.dawnsci.jzy3d.examples">
+      </category>
+      <view
+            name="JZY3dView"
+            icon="icons/sample.gif"
+            category="org.dawnsci.jzy3d.examples"
+            class="org.dawnsci.jzy3d.examples.views.JZY3dView"
+            id="org.dawnsci.jzy3d.examples.views.JZY3dView">
+      </view>
+   </extension>
+
+</plugin>
