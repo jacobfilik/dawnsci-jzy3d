@@ -8,5 +8,6 @@ Require-Bundle: org.eclipse.core.runtime,
  com.jogamp.jogl,
  org.eclipse.january,
  org.dawnsci.jzy3d;bundle-version="1.0.0",
- uk.ac.diamond.scisoft.analysis
+ uk.ac.diamond.scisoft.analysis,
+ org.eclipse.dawnsci.plotting.api;bundle-version="1.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

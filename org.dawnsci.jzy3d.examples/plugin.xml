@@ -16,5 +16,12 @@
             id="org.dawnsci.jzy3d.examples.views.JZY3dView">
       </view>
    </extension>
+   <extension
+         point="org.eclipse.dawnsci.plotting.api.plottingViewer">
+      <plottingViewer
+            class="org.dawnsci.jzy3d.examples.views.JZY3DPlotViewer"
+            id="org.dawnsci.jzy3d.examples.views.JZY3DPlotViewer">
+      </plottingViewer>
+   </extension>
 
 </plugin>

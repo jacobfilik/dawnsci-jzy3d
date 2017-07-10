@@ -15,9 +15,15 @@ import org.jzy3d.maths.Range;
 import org.jzy3d.plot3d.builder.Builder;
 import org.jzy3d.plot3d.builder.Mapper;
 import org.jzy3d.plot3d.builder.concrete.OrthonormalGrid;
+import org.jzy3d.plot3d.builder.concrete.OrthonormalTessellator;
+import org.jzy3d.plot3d.primitives.AbstractComposite;
+import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.primitives.CroppableLineStrip;
+import org.jzy3d.plot3d.primitives.LineStrip;
 import org.jzy3d.plot3d.primitives.Point;
+import org.jzy3d.plot3d.primitives.Polygon;
 import org.jzy3d.plot3d.primitives.Shape;
+import org.jzy3d.plot3d.primitives.TesselatedPolygon;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
 
 import com.jogamp.common.util.JarUtil;
@@ -36,6 +42,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.analysis.polynomials.PolynomialsUtils;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.january.dataset.Dataset;
@@ -118,7 +125,9 @@ public class JZY3dView extends ViewPart {
        };
        
        int x = 128;
-       int y = 256;
+       int y = 128;
+       
+       
 
 //       // Define range and precision for the function to plot
        Range rangex = new Range(0, x-1);
@@ -126,9 +135,14 @@ public class JZY3dView extends ViewPart {
        Range rangey = new Range(0,  y-1);
        int stepsy = y;
        
+       float[] x1 = new float[]{0,0,0.5f,0.5f,0.75f,0.75f};
+       float[] x2 = new float[]{0,1,0,1,0,1};
+       float[] x3 = new float[]{0,0,0,1,1,1};
        // Create the object to represent the function over the given range.
        
        final Shape surface = Builder.buildOrthonormal(new OrthonormalGrid(rangex, stepsx, rangey, stepsy), mapper);
+       OrthonormalTessellator t = new OrthonormalTessellator();
+//       final AbstractComposite surface = t.build(x1, x2, x3);
        surface.setColorMapper(new ColorMapper(new ColorMapRainbow(), surface.getBounds().getZmin(), surface.getBounds().getZmax()/4, new Color(1, 1, 1, .5f)));
        surface.setFaceDisplayed(true);
        surface.setWireframeDisplayed(false);
@@ -137,27 +151,81 @@ public class JZY3dView extends ViewPart {
        
 		
        
-//		List<CroppableLineStrip> strip = new ArrayList<CroppableLineStrip>();
+		List<AbstractDrawable> strip = new ArrayList<AbstractDrawable>();
 //		
-//		for (int i = 0; i < 20; i++) {
+		
+		float off = 0f;
+		Color w = new Color(1, 1, 1, 1);
+		for (int i = 0; i < 12; i++) {
+       
+			Polygon poly = new Polygon();
+//			LineStrip poly = new LineStrip();
+			poly.add(new Point(new Coord3d(0, i, 0),Color.BLACK));
 //			CroppableLineStrip s = new CroppableLineStrip();
-//			for (int j = 0; j < 200; j++) {
+			for (int j = 0; j < 128; j++) {
+				Color c = d.getDouble(i,j)+2 > 5 ? Color.BLUE : Color.BLACK;
+				Coord3d c0 = new Coord3d(j, i, 0+off);
+				Point p0 = new Point(c0, Color.WHITE);
+				Coord3d c1 = new Coord3d(j, i, d.getDouble(i,j)+2-off);
+				Point p1 = new Point(c1, Color.WHITE);
+				Coord3d c2 = new Coord3d(j+1, i, d.getDouble(i,j+1)+2-off);
+				Point p2 = new Point(c2, Color.WHITE);
+				Coord3d c3 = new Coord3d(j+1, i, 0+off);
+				Point p3 = new Point(c3, Color.WHITE);
+				TesselatedPolygon p = new TesselatedPolygon(new Point[]{p0,p1,p2,p3});
+				poly.add(new Point(new Coord3d(j, i, d.getDouble(i,j)+2),c));
+				
+//				
 //				Coord3d c = new Coord3d(i, j, d.getDouble(i,j)+2);
 //				Point p = new Point(c);
-//				p.setColor(Color.BLUE);
+//				p.setColor(Color.WHITE);
 //				s.add(new Point(c));
-//			}
-//			s.setWireframeColor(Color.BLACK);
+//				p.setWireframeColor(Color.WHITE);
+//				p.setWireframeWidth(2);
+				List<AbstractDrawable> drawables = p.getDrawables();
+				for (AbstractDrawable dr : drawables) {
+					if (dr instanceof Polygon) {
+						((Polygon)dr).setPolygonOffsetFactor(1);
+						((Polygon)dr).setPolygonOffsetUnit(1);
+						((Polygon)dr).setPolygonOffsetFillEnable(true);
+					}
+				}
+				strip.add(p);
+			}
+			
+			poly.add(new Point(new Coord3d(128, i, d.getDouble(i,128)+2),Color.BLACK));
+			poly.add(new Point(new Coord3d(128, i, 0),Color.BLACK));
+			poly.add(new Point(new Coord3d(0, i, 0),Color.BLACK));
+//			poly.setShowPoints(true);
+//			poly.setWireframeColor(Color.BLUE);
+			poly.setFaceDisplayed(true);
+			poly.setWireframeColor(Color.BLACK);
+			poly.setPolygonOffsetFactor(-1);
+			poly.setPolygonOffsetUnit(-1);
+			poly.setPolygonOffsetFillEnable(true);
+//			surface.setFaceDisplayed(true);
+		       poly.setWireframeDisplayed(true);
+		       poly.setWireframeWidth(2f);
+//		       poly.setWidth(2f);
+//			 poly.setColorMapper(new ColorMapper(new ColorMapRainbow(), poly.getBounds().getZmin(), poly.getBounds().getZmax()/4, new Color(1, 1, 1, .5f)));
+			strip.add(poly);
+//			poly.setWireframeColor(Color.BLACK);
 //			s.setFaceDisplayed(true);
 //			strip.add(s);
-//		}
+		}
 		
        Settings.getInstance().setHardwareAccelerated(true);
-		Chart chart = SWTChartComponentFactory.chart(parent, Quality.Intermediate);
-		chart.getScene().getGraph().add(surface);
-		chart.getView().setSquared(false);
+       Quality q = Quality.Fastest;
+       q.setSmoothPolygon(true);
+       q.setSmoothPoint(true);
+       q.setSmoothEdge(true);
+       q.setDepthActivated(true);
+//       q.setAlphaActivated(false);
+		Chart chart = SWTChartComponentFactory.chart(parent, q);
+//		chart.getScene().getGraph().add(surface);
+//		chart.getView().setSquared(false);
 		
-//       chart.getScene().getGraph().add(strip);
+       chart.getScene().getGraph().add(strip);
 //       
 //       chart.getAxeLayout().setXAxeLabel("cake");
 //       chart.getAxeLayout().setYAxeLabel("sweets");
