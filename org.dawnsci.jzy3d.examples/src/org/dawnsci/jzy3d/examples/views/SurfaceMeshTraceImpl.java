@@ -1,5 +1,7 @@
 package org.dawnsci.jzy3d.examples.views;
 
+import java.util.Arrays;
+
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 import org.eclipse.january.dataset.IDataset;
 import org.jzy3d.colors.Color;
@@ -17,6 +19,7 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace {
 	private String name;
 	private Shape shape;
 	private SurfaceMapper mapper;
+	private IDataset data;
 	
 	private Object userObject;
 	
@@ -33,6 +36,7 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace {
 
 	@Override
 	public void setData(IDataset data, IDataset[] axes) {
+		this.data = data;
 			int x = data.getShape()[0];
 			int y = data.getShape()[1];
 			Range rangex = new Range(0, x-1);
@@ -40,6 +44,9 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace {
 	       Range rangey = new Range(0,  y-1);
 	       int stepsy = y;
 	       
+	       if (mapper != null && !Arrays.equals(mapper.getDataShape(),data.getShape())) mapper = null;
+	       
+	       if (mapper == null) {
 	    	   mapper = new SurfaceMapper(data);
 	    	   final Shape surface = Builder.buildOrthonormal(new OrthonormalGrid(rangex, stepsx, rangey, stepsy), mapper);
 //		       OrthonormalTessellator t = new OrthonormalTessellator();
@@ -48,6 +55,12 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace {
 		       surface.setFaceDisplayed(true);
 		       surface.setWireframeDisplayed(false);
 		       shape = surface;
+	       } else {
+	    	   mapper.updateData(data);
+	    	   mapper.remap(shape);
+	       }
+	       
+	    	   
 	       
 	       // Create the object to represent the function over the given range.
 	       
@@ -73,8 +86,7 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace {
 
 	@Override
 	public IDataset getData() {
-		// TODO Auto-generated method stub
-		return null;
+		return data;
 	}
 
 	@Override
@@ -140,6 +152,10 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace {
 		
 		public void updateData(IDataset data) {
 			this.data = data;
+		}
+		
+		public int[] getDataShape(){
+			return data.getShape();
 		}
 
 		@Override
