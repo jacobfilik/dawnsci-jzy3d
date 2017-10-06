@@ -26,6 +26,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		control.setLayout(new FillLayout());
 		Settings.getInstance().setHardwareAccelerated(true);
 		chart = SWTChartComponentFactory.chart(control, Quality.Intermediate);
+//		chart.getView().setSquared(false);
 		ChartLauncher.openChart(chart);
 	}
 	
@@ -35,7 +36,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 //			chart.clear();
 //			ChartLauncher.openChart(chart);
 //			chart.getScene().remove(((SurfaceMeshTraceImpl)trace).getShape());
-//			chart.resumeAnimator();
+			chart.resumeAnimator();
 			chart.getScene().add(((SurfaceMeshTraceImpl)trace).getShape());
 			
 			return true;
@@ -48,8 +49,8 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		if (trace instanceof SurfaceMeshTraceImpl) {
 //			chart.clear();
 //			ChartLauncher.openChart(chart);
-//			chart.pauseAnimator();
-			chart.getScene().remove(((SurfaceMeshTraceImpl)trace).getShape());
+			chart.pauseAnimator();
+			chart.getScene().remove(((SurfaceMeshTraceImpl)trace).getShape(),false);
 
 		}
 	}
