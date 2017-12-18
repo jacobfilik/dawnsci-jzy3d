@@ -400,150 +400,150 @@ public class JZY3dView extends ViewPart {
 //		viewer.getControl().setFocus();
 	}
 	
-	private AbstractDrawable getVBO() {
-		IDataHolder dh;
-		try {
-			dh = LoaderFactory.getData("/dls/science/groups/das/ExampleData/fun volumes/miro_test2.nxs02_savu.plugins.astra_recon_cpu_tomo.h5");
-		
-		final ILazyDataset ld = dh.getLazyDataset("/2-AstraReconCpu/data");
-		
-		SliceND sl = new SliceND(ld.getShape());
-		sl.setSlice(0, 200, 600, 1);
-		sl.setSlice(2, 200, 600, 1);
-		
-		final ILazyDataset fld = ld.getSliceView(sl);
-		
-		MarchingCubesModel model = new MarchingCubesModel(fld, (List<? extends IDataset> )null, 0.0025, new int[] {4,4,4}, new int[] {0,0,0}, 0, "isosurface_trace");
-		
-		MarchingCubes cubes = new MarchingCubes(model);
-		
-		
-		
-		Surface s = cubes.execute(new IProgressMonitor() {
-			
-			@Override
-			public void worked(int work) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void subTask(String name) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void setTaskName(String name) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void setCanceled(boolean value) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public boolean isCanceled() {
-				// TODO Auto-generated method stub
-				return false;
-			}
-			
-			@Override
-			public void internalWorked(double work) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void done() {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void beginTask(String name, int totalWork) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-		
-		final Set<Triangle> triangles = s.getTriangles();
-		
-		DrawableVBO v = new DrawableVBO(new IGLLoader<DrawableVBO>() {
-			
-			@Override
-			public void load(GL gl, DrawableVBO drawable) throws Exception {
-				
-				int n = triangles.size();
-				int components = 3; // x, y, z
-		        int geomsize = 3; // triangle
-		        
-		        // Allocate content
-		        FloatBuffer vertices = FloatBuffer.allocate(n * (components*2) * geomsize); // *2 normals
-		        IntBuffer indices = IntBuffer.allocate(n * geomsize);
-		        BoundingBox3d bounds = new BoundingBox3d();
-		        
-		        // Feed buffers
-		        int size = 0;
-		        for (Triangle t : triangles) {
-		        
-		            Coord3d c1 = new Coord3d(t.getA().getxCoord(),t.getA().getyCoord(),t.getA().getzCoord());
-		            Coord3d c2 = new Coord3d(t.getB().getxCoord(),t.getB().getyCoord(),t.getB().getzCoord());
-		            Coord3d c3 = new Coord3d(t.getC().getxCoord(),t.getC().getyCoord(),t.getC().getzCoord());
-		            Coord3d no = Normal.compute(c1, c2, c3);
-		            
-		            indices.put(size++);
-		            vertices.put(c1.x);
-		            vertices.put(c1.y);
-		            vertices.put(c1.z);
-		            vertices.put(no.x);
-		            vertices.put(no.y);
-		            vertices.put(no.z);            
-		            bounds.add(c1);
-		            
-		            indices.put(size++);
-		            vertices.put(c2.x);
-		            vertices.put(c2.y);
-		            vertices.put(c2.z);
-		            vertices.put(no.x);
-		            vertices.put(no.y);
-		            vertices.put(no.z);
-		            bounds.add(c2);
-
-		            indices.put(size++);
-		            vertices.put(c3.x);
-		            vertices.put(c3.y);
-		            vertices.put(c3.z);
-		            vertices.put(no.x);
-		            vertices.put(no.y);
-		            vertices.put(no.z);            
-		            bounds.add(c3);
-		        }
-		        vertices.rewind();
-		        indices.rewind();
-		        
-		        // Store in GPU
-		        drawable.setData(gl, indices, vertices, bounds);
-				
-				
-			}
-		});
-		
-		v.setColor(Color.GRAY);
-//		v.setGeometry(GL.GL_POINTS);
-		
-		return v;
-		
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
+//	private AbstractDrawable getVBO() {
+//		IDataHolder dh;
+//		try {
+//			dh = LoaderFactory.getData("/dls/science/groups/das/ExampleData/fun volumes/miro_test2.nxs02_savu.plugins.astra_recon_cpu_tomo.h5");
+//		
+//		final ILazyDataset ld = dh.getLazyDataset("/2-AstraReconCpu/data");
+//		
+//		SliceND sl = new SliceND(ld.getShape());
+//		sl.setSlice(0, 200, 600, 1);
+//		sl.setSlice(2, 200, 600, 1);
+//		
+//		final ILazyDataset fld = ld.getSliceView(sl);
+//		
+//		MarchingCubesModel model = new MarchingCubesModel(fld, (List<? extends IDataset> )null, 0.0025, new int[] {4,4,4}, new int[] {0,0,0}, 0, "isosurface_trace");
+//		
+//		MarchingCubes cubes = new MarchingCubes(model);
+//		
+//		
+//		
+//		Surface s = cubes.execute(new IProgressMonitor() {
+//			
+//			@Override
+//			public void worked(int work) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//			
+//			@Override
+//			public void subTask(String name) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//			
+//			@Override
+//			public void setTaskName(String name) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//			
+//			@Override
+//			public void setCanceled(boolean value) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//			
+//			@Override
+//			public boolean isCanceled() {
+//				// TODO Auto-generated method stub
+//				return false;
+//			}
+//			
+//			@Override
+//			public void internalWorked(double work) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//			
+//			@Override
+//			public void done() {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//			
+//			@Override
+//			public void beginTask(String name, int totalWork) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		});
+//		
+//		final Set<Triangle> triangles = s.getTriangles();
+//		
+//		DrawableVBO v = new DrawableVBO(new IGLLoader<DrawableVBO>() {
+//			
+//			@Override
+//			public void load(GL gl, DrawableVBO drawable) throws Exception {
+//				
+//				int n = triangles.size();
+//				int components = 3; // x, y, z
+//		        int geomsize = 3; // triangle
+//		        
+//		        // Allocate content
+//		        FloatBuffer vertices = FloatBuffer.allocate(n * (components*2) * geomsize); // *2 normals
+//		        IntBuffer indices = IntBuffer.allocate(n * geomsize);
+//		        BoundingBox3d bounds = new BoundingBox3d();
+//		        
+//		        // Feed buffers
+//		        int size = 0;
+//		        for (Triangle t : triangles) {
+//		        
+//		            Coord3d c1 = new Coord3d(t.getA().getxCoord(),t.getA().getyCoord(),t.getA().getzCoord());
+//		            Coord3d c2 = new Coord3d(t.getB().getxCoord(),t.getB().getyCoord(),t.getB().getzCoord());
+//		            Coord3d c3 = new Coord3d(t.getC().getxCoord(),t.getC().getyCoord(),t.getC().getzCoord());
+//		            Coord3d no = Normal.compute(c1, c2, c3);
+//		            
+//		            indices.put(size++);
+//		            vertices.put(c1.x);
+//		            vertices.put(c1.y);
+//		            vertices.put(c1.z);
+//		            vertices.put(no.x);
+//		            vertices.put(no.y);
+//		            vertices.put(no.z);            
+//		            bounds.add(c1);
+//		            
+//		            indices.put(size++);
+//		            vertices.put(c2.x);
+//		            vertices.put(c2.y);
+//		            vertices.put(c2.z);
+//		            vertices.put(no.x);
+//		            vertices.put(no.y);
+//		            vertices.put(no.z);
+//		            bounds.add(c2);
+//
+//		            indices.put(size++);
+//		            vertices.put(c3.x);
+//		            vertices.put(c3.y);
+//		            vertices.put(c3.z);
+//		            vertices.put(no.x);
+//		            vertices.put(no.y);
+//		            vertices.put(no.z);            
+//		            bounds.add(c3);
+//		        }
+//		        vertices.rewind();
+//		        indices.rewind();
+//		        
+//		        // Store in GPU
+//		        drawable.setData(gl, indices, vertices, bounds);
+//				
+//				
+//			}
+//		});
+//		
+//		v.setColor(Color.GRAY);
+////		v.setGeometry(GL.GL_POINTS);
+//		
+//		return v;
+//		
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		return null;
+//	}
 	
 	private AbstractDrawable getTexture() {
 		Coord3d position = new Coord3d(2.0, 2.0, 2.0);

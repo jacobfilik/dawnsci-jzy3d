@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
+//import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -99,6 +100,16 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			return (U)trace;
 		}
 		return null;
+	}
+	
+	@Override
+	public void clearTraces() {
+		chart.clear();
+		
+	}
+	@Override
+	public void reset(boolean force) {
+		chart.clear();
 	}
 	
 }

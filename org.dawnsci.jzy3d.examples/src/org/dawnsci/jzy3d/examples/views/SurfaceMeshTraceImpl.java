@@ -40,6 +40,8 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 	
 	private ImageServiceBean bean;
 	
+	private ColorMapper colorMapper;
+	
 	@Override
 	public String getName() {
 		return name;
@@ -53,6 +55,8 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 
 	@Override
 	public void setData(IDataset data, IDataset[] axes) {
+		
+		
 		
 		bean = new ImageServiceBean(data, HistoType.OUTLIER_VALUES);
 		
@@ -71,13 +75,16 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 	    	   final Shape surface = Builder.buildOrthonormal(new OrthonormalGrid(rangex, stepsx, rangey, stepsy), mapper);
 //		       OrthonormalTessellator t = new OrthonormalTessellator();
 //		       final AbstractComposite surface = t.build(x1, x2, x3);
-		       surface.setColorMapper(new ColorMapper(new ColorMapRainbow(), surface.getBounds().getZmin(), surface.getBounds().getZmax(), new Color(1, 1, 1, .5f)));
+	    	   if (colorMapper == null) {
+	    		   colorMapper = new ColorMapper(new ColorMapRainbow(), surface.getBounds().getZmin(), surface.getBounds().getZmax(), new Color(1, 1, 1, .5f));
+	   		}
+		       surface.setColorMapper(colorMapper);
 		       surface.setFaceDisplayed(true);
 		       surface.setWireframeDisplayed(false);
 		       shape = surface;
 	       } else {
 	    	   mapper.updateData(data);
-	    	   mapper.remap(shape);
+//	    	   mapper.remap(shape);
 	       }
 	       
 	    	   
@@ -240,7 +247,9 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 			}
 		};
 		
-		shape.setColorMapper(new ColorMapper(map, shape.getBounds().getZmin(), shape.getBounds().getZmax(), new Color(1, 1, 1, .5f)));
+		colorMapper = new ColorMapper(map, shape.getBounds().getZmin(), shape.getBounds().getZmax(), new Color(1, 1, 1, .5f));
+		
+		shape.setColorMapper(colorMapper);
 		
 	}
 
