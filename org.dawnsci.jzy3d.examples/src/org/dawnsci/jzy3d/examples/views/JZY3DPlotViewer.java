@@ -4,18 +4,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
+import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 //import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jzy3d.chart.Chart;
 import org.jzy3d.chart.ChartLauncher;
 import org.jzy3d.chart.Settings;
 import org.jzy3d.chart.swt.SWTChartComponentFactory;
+import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
+import org.jzy3d.plot3d.rendering.scene.Graph;
 
 public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
@@ -37,6 +43,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 //			chart.clear();
 //			ChartLauncher.openChart(chart);
 //			chart.getScene().remove(((SurfaceMeshTraceImpl)trace).getShape());
+			((SurfaceMeshTraceImpl) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 			chart.resumeAnimator();
 			chart.getScene().add(((SurfaceMeshTraceImpl)trace).getShape());
 			
@@ -104,12 +111,28 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
 	@Override
 	public void clearTraces() {
-		chart.clear();
+		Graph graph = chart.getScene().getGraph();
+		List<AbstractDrawable> all = graph.getAll();
+		for (AbstractDrawable a : all) {
+			graph.remove(a);
+		}
 		
 	}
 	@Override
 	public void reset(boolean force) {
-		chart.clear();
+		Graph graph = chart.getScene().getGraph();
+		List<AbstractDrawable> all = graph.getAll();
+		for (AbstractDrawable a : all) {
+			graph.remove(a);
+		}
+		
+	}
+	
+	private IPreferenceStore store;
+	private IPreferenceStore getPreferenceStore() {
+		if (store!=null) return store;
+		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		return store;
 	}
 	
 }

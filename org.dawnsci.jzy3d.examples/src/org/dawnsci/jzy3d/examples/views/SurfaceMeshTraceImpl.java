@@ -4,12 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
+import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
@@ -23,6 +26,7 @@ import org.jzy3d.plot3d.builder.Builder;
 import org.jzy3d.plot3d.builder.Mapper;
 import org.jzy3d.plot3d.builder.concrete.OrthonormalGrid;
 import org.jzy3d.plot3d.builder.concrete.OrthonormalTessellator;
+import org.jzy3d.plot3d.primitives.AbstractComposite;
 import org.jzy3d.plot3d.primitives.Shape;
 
 public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
@@ -56,46 +60,111 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 	@Override
 	public void setData(IDataset data, IDataset[] axes) {
 		
-		
-		
 		bean = new ImageServiceBean(data, HistoType.OUTLIER_VALUES);
 		
+		IImageService imageService = ServiceManager.getImageService();
+		double[] fs = imageService.getFastStatistics(bean);
+		
+		bean.setMin(fs[0]);
+		bean.setMax(fs[1]);
+		
+		float max = bean.getMax().floatValue();
+		float min = bean.getMin().floatValue();
+
 		this.data = data;
-			int x = data.getShape()[0];
-			int y = data.getShape()[1];
-			Range rangex = new Range(0, x-1);
-	       int stepsx = x;
-	       Range rangey = new Range(0,  y-1);
-	       int stepsy = y;
+		int x = data.getShape()[1];
+		int y = data.getShape()[0];
+
+
+		FloatDataset z = DatasetUtils.cast(FloatDataset.class, data);
+		float[] xArray = null;
+		float[] yArray = null;
+
+
+		xArray = (axes != null && axes[0] != null) ? DatasetUtils.cast(FloatDataset.class, axes[0]).getData() : getRange(x);
+		yArray = (axes != null && axes[1] != null) ? DatasetUtils.cast(FloatDataset.class, axes[1]).getData() : getRange(y);
+
+		final Shape surface  = MeshTessellator.buildShape(yArray, xArray, z.getData());
+			
+	
+		if (colorMapper == null) {
+			colorMapper = new ColorMapper(new ColorMapRainbow(), min, max, new Color(1, 1, 1, .5f));
+		}
+		surface.setColorMapper(colorMapper);
+		surface.setFaceDisplayed(true);
+		surface.setWireframeDisplayed(false);
+		
+		shape = surface;
 	       
-	       if (mapper != null && !Arrays.equals(mapper.getDataShape(),data.getShape())) mapper = null;
-	       
-	       if (mapper == null) {
-	    	   mapper = new SurfaceMapper(data);
-	    	   final Shape surface = Builder.buildOrthonormal(new OrthonormalGrid(rangex, stepsx, rangey, stepsy), mapper);
-//		       OrthonormalTessellator t = new OrthonormalTessellator();
-//		       final AbstractComposite surface = t.build(x1, x2, x3);
-	    	   if (colorMapper == null) {
-	    		   colorMapper = new ColorMapper(new ColorMapRainbow(), surface.getBounds().getZmin(), surface.getBounds().getZmax(), new Color(1, 1, 1, .5f));
-	   		}
-		       surface.setColorMapper(colorMapper);
-		       surface.setFaceDisplayed(true);
-		       surface.setWireframeDisplayed(false);
-		       shape = surface;
-	       } else {
-	    	   mapper.updateData(data);
-//	    	   mapper.remap(shape);
-	       }
-	       
-	    	   
-	       
-	       // Create the object to represent the function over the given range.
-	       
-	       
+	}
+	
+	private float[] getRange(int n) {
+		float[] array = new float[n];
+		fillRange(array);
+		return array;
+	}
+	
+	private void fillRange(float[] array) {
+		
+		float count = 0;
+		
+		for (int i = 0; i < array.length; i++) {
+			
+			array[i] = i;
+		
+//			if (i > (array.length/3) && i < 2*(array.length/3)) {
+//				count +=0.1;
+//			} else {
+//				count++;
+//			}
+//			
+//			array[i] = count;
+			
+		}
+		
+	}
+	
+	private void fillInOrder(float[] small, float[] big) {
+		
+		int remainder = big.length%small.length;
+		
+		if (remainder != 0) {
+			throw new IllegalArgumentException("Size of big not compatible with small");
+		}
+		
+		int n = big.length/small.length;
+		
+		for (int i = 0; i < n; i++) {
+			System.arraycopy(small, 0, big, small.length*i, small.length);
+		}	
+	}
+	
+	private void fillWithRange(float[] big, int n) {
+		
+		int remainder = big.length%n;
+		
+		if (remainder != 0) {
+			throw new IllegalArgumentException("Size of big not compatible with n");
+		}
+		
+		int n2 = big.length/n;
+		
+		float[] small = new float[n];
+		System.arraycopy(small, 0, big, 0, small.length);
+		
+		for (int i = 1; i < n2; i++) {
+			Arrays.fill(small, i);
+			System.arraycopy(small, 0, big, small.length*i, small.length);
+		}
+		
 	}
 	
 	public Shape getShape(){
 		return shape;
+	}
+	
+	private Shape buildShape(IDataset data, IDataset[] axes) {
+		return null;
 	}
 	
 	
@@ -241,7 +310,6 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 		        float v = (float) rel_value;
 		        float r = (float) rel_value;
 		        
-//		return new Color( r, v, b );
 				RGB rgb = paletteData.getRGB((int)(rel_value*255));
 				return new Color((float)(rgb.red/255.), (float)(rgb.green/255.), (float)(rgb.blue/255.));
 			}
