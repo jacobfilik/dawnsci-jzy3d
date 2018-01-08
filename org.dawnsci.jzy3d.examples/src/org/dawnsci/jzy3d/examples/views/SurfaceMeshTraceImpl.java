@@ -46,6 +46,9 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 	
 	private ColorMapper colorMapper;
 	
+	private PaletteData paletteData;
+	private String paletteName;
+	
 	@Override
 	public String getName() {
 		return name;
@@ -60,7 +63,9 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 	@Override
 	public void setData(IDataset data, IDataset[] axes) {
 		
-		bean = new ImageServiceBean(data, HistoType.OUTLIER_VALUES);
+		if (bean == null) {
+			bean = new ImageServiceBean(data, HistoType.OUTLIER_VALUES);
+		}
 		
 		IImageService imageService = ServiceManager.getImageService();
 		double[] fs = imageService.getFastStatistics(bean);
@@ -74,8 +79,7 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 		this.data = data;
 		int x = data.getShape()[1];
 		int y = data.getShape()[0];
-
-
+		
 		FloatDataset z = DatasetUtils.cast(FloatDataset.class, data);
 		float[] xArray = null;
 		float[] yArray = null;
@@ -287,12 +291,13 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 	
 	@Override
 	public PaletteData getPaletteData() {
-		// TODO Auto-generated method stub
-		return null;
+		return paletteData;
 	}
 
 	@Override
 	public void setPaletteData(PaletteData paletteData) {
+		if (paletteData == null) return;
+		this.paletteData = paletteData; 
 		AbstractColorMap map = new AbstractColorMap() {
 			
 			@Override
@@ -315,7 +320,12 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 			}
 		};
 		
-		colorMapper = new ColorMapper(map, shape.getBounds().getZmin(), shape.getBounds().getZmax(), new Color(1, 1, 1, .5f));
+		float zmin = shape.getBounds().getZmin();
+		float zman = shape.getBounds().getZmax();
+		float bmin = bean.getMin().floatValue();
+		float bmax = bean.getMax().floatValue();
+		
+		colorMapper = new ColorMapper(map, bmin, bmax, new Color(1, 1, 1, .5f));
 		
 		shape.setColorMapper(colorMapper);
 		
@@ -323,19 +333,17 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 
 	@Override
 	public String getPaletteName() {
-		// TODO Auto-generated method stub
-		return null;
+		return paletteName;
 	}
 
 	@Override
 	public void setPaletteName(String paletteName) {
-		paletteName.toString();
+		this.paletteName = paletteName;
 		
 	}
 
 	@Override
 	public void setPalette(String paletteName) {
-//		String orig = this.paletteName;
 		IPaletteService pservice = ServiceManager.getPaletteService();
 		final PaletteData paletteData = pservice.getDirectPaletteData(paletteName);
         setPaletteName(paletteName);
@@ -363,61 +371,59 @@ public class SurfaceMeshTraceImpl implements ISurfaceMeshTrace, IPaletteTrace {
 
 	@Override
 	public Number getMin() {
-		// TODO Auto-generated method stub
-		return null;
+		return bean.getMin();
 	}
 
 	@Override
 	public Number getMax() {
-		// TODO Auto-generated method stub
-		return null;
+		return bean.getMax();
 	}
 
 	@Override
 	public HistogramBound getNanBound() {
-		// TODO Auto-generated method stub
-		return null;
+		return bean.getNanBound();
 	}
 
 	@Override
 	public HistogramBound getMinCut() {
-		// TODO Auto-generated method stub
-		return null;
+		return bean.getMinimumCutBound();
 	}
 
 	@Override
 	public HistogramBound getMaxCut() {
-		// TODO Auto-generated method stub
-		return null;
+		return bean.getMaximumCutBound();
 	}
 
 	@Override
 	public void setNanBound(HistogramBound bound) {
-		// TODO Auto-generated method stub
+		bean.setNanBound(bound);
 		
 	}
 
 	@Override
 	public void setMinCut(HistogramBound bound) {
-		// TODO Auto-generated method stub
+		bean.setMinimumCutBound(bound);
 		
 	}
 
 	@Override
 	public void setMaxCut(HistogramBound bound) {
-		// TODO Auto-generated method stub
+		bean.setMinimumCutBound(bound);
 		
 	}
 
 	@Override
 	public void setMin(Number min) {
-		// TODO Auto-generated method stub
+		if (bean==null) return;
+		bean.setMax(min);
+		
 		
 	}
 
 	@Override
 	public void setMax(Number max) {
-		// TODO Auto-generated method stub
+		if (bean==null) return;
+		bean.setMax(max);
 		
 	}
 
