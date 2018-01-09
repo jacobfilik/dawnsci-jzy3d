@@ -10,6 +10,7 @@ import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 //import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.IWaterfallTrace;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -49,6 +50,16 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			
 			return true;
 		}
+		if (trace instanceof WaterfallTraceImpl) {
+//			chart.clear();
+//			ChartLauncher.openChart(chart);
+//			chart.getScene().remove(((SurfaceMeshTraceImpl)trace).getShape());
+			((WaterfallTraceImpl) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+			chart.resumeAnimator();
+			chart.getScene().add(((WaterfallTraceImpl)trace).getShape());
+			
+			return true;
+		}
 		return false;
 	}
 	
@@ -59,6 +70,14 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 //			ChartLauncher.openChart(chart);
 			chart.pauseAnimator();
 			chart.getScene().remove(((SurfaceMeshTraceImpl)trace).getShape(),false);
+
+		}
+		
+		if (trace instanceof WaterfallTraceImpl) {
+//			chart.clear();
+//			ChartLauncher.openChart(chart);
+			chart.pauseAnimator();
+			chart.getScene().remove(((WaterfallTraceImpl)trace).getShape(),false);
 
 		}
 	}
@@ -82,6 +101,10 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		if (ISurfaceMeshTrace.class.isAssignableFrom(trace)) {
 			return true;
 		}
+		
+		if (IWaterfallTrace.class.isAssignableFrom(trace)) {
+			return true;
+		}
 		return false;
 	}
 	
@@ -92,6 +115,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	public Collection<Class<? extends ITrace>> getSupportTraceTypes(){
 		List<Class<? extends ITrace>> l = new ArrayList<>();
 		l.add(ISurfaceMeshTrace.class);
+		l.add(IWaterfallTrace.class);
 		return l;
 	}
 	
@@ -103,6 +127,12 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz){
 		if (clazz == ISurfaceMeshTrace.class) {
 			SurfaceMeshTraceImpl trace = new SurfaceMeshTraceImpl();
+			trace.setName(name);
+			return (U)trace;
+		}
+		
+		if (clazz == IWaterfallTrace.class) {
+			IWaterfallTrace trace = new WaterfallTraceImpl();
 			trace.setName(name);
 			return (U)trace;
 		}
